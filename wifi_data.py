@@ -7,7 +7,7 @@ import numpy as np
 
 class wifi_data(object):
     """docstring for wifi_data."""
-    def __init__(self, folder_location, filename, normalize, verbose):
+    def __init__(self, folder_location, filename, normalize, verbose, nTraining, nTesting, nValidation):
         super(wifi_data, self).__init__()
         self.filename = filename
         self.folder_location= folder_location
@@ -26,9 +26,9 @@ class wifi_data(object):
         self.__data_container__ = None
         self.__full_file_location__ = self.construct_full_location(self.folder_location, self.filename)
         self.__nSamples__ = None
-        self.__nTraining__ = 2120
-        self.__nTesting__ = 500
-        self.__nValid__ = 500
+        self.__nTraining__ = nTraining
+        self.__nTesting__ = nTesting
+        self.__nValid__ = nValidation
 
         if self.verbose:
             print "Folder Location: ", self.folder_location
@@ -76,18 +76,22 @@ class wifi_data(object):
         pos_train = None
         test_set = None
         pos_test = None
+        valid_set = None
+        pos_valid = None
 
         self.__nSamples__ = self.__pos__.shape[0]
 
         [train_idx, test_idx, valid_idx] = self.get_randomly_sampled_indices(self.__nSamples__)
 
         train_set = fspace[train_idx,:]
-        test_set = fspace[test_idx,:]
-        valid_set = fspace[valid_idx,:]
-
         pos_train = pos[train_idx,:]
+
+        test_set = fspace[test_idx,:]
         pos_test = pos[test_idx,:]
-        pos_valid = pos[valid_idx,:]
+
+        if valid_idx!=None:
+            valid_set = fspace[valid_idx,:]
+            pos_valid = pos[valid_idx,:]
 
         return train_set, pos_train, test_set, pos_test, valid_set, pos_valid
 
@@ -100,8 +104,10 @@ class wifi_data(object):
         test_idx = self.rand_sample(idx, self.__nTesting__)
         idx = self.update_population(idx, test_idx)
 
-        valid_idx = self.rand_sample(idx, self.__nValid__)
-        idx = self.update_population(idx, valid_idx)
+        valid_idx=None
+        if self.__nValid__ !=0:
+            valid_idx = self.rand_sample(idx, self.__nValid__)
+            idx = self.update_population(idx, valid_idx)
 
         return train_idx, test_idx, valid_idx
 
@@ -135,7 +141,6 @@ class wifi_data(object):
         except Exception as e:
             print "Exception caught!"
             print e
-
         return exists
 
     def construct_full_location(self, folder_location, fname):
