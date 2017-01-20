@@ -7,7 +7,7 @@ import numpy as np
 
 class wifi_data(object):
     """docstring for wifi_data."""
-    def __init__(self, folder_location, filename, normalize, verbose, nTraining, nTesting, nValidation):
+    def __init__(self, folder_location, filename, normalize, nTraining, nTesting, nValidation, verbose=False, missingValues=0):
         super(wifi_data, self).__init__()
         self.filename = filename
         self.folder_location= folder_location
@@ -29,6 +29,7 @@ class wifi_data(object):
         self.__nTraining__ = nTraining
         self.__nTesting__ = nTesting
         self.__nValid__ = nValidation
+        self.__missingValues__ = missingValues
 
         if self.verbose:
             print "Folder Location: ", self.folder_location
@@ -47,6 +48,9 @@ class wifi_data(object):
         self.__data_container__ = self.read_file(self.__full_file_location__)
 
         self.__pos__, self.__feature_space__ = self.extract_data_from_container(self.__data_container__)
+
+        if self.__missingValues__ != 0:
+            self.__feature_space__[self.__feature_space__==0] = self.__missingValues__
 
         if verbose:
             print self.__pos__
