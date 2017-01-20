@@ -4,40 +4,46 @@ import numpy as np
 import wifi_data
 import os
 import nn
-
-def localization_loss(y, y_pred):
-    error = y-y_pred
-    e_x = error[:, 0]
-    e_y = error[:, 1]
-    return np.mean(e_x**2+e_y**2, axis=0)
+import gru
 
 def main():
     fname_dataset = "full_data_ucm.mat"
-    fname_model = "model_nn.h5"
+    fname_model = "1484752125_model_nn.h5"
+    fname_model_rnn = "1484752125_model_rnn.h5"
     folderLocation = os.path.dirname(os.path.realpath(__file__))
-    dataset = wifi_data.wifi_data(folderLocation, fname_dataset, True, False, 2370, 750, 0)
-    # dataset = wifi_data.wifi_data(folderLocation, fname_dataset, True, False, 2120, 500, 500)
-
+    # Create the dataset
+    dataset = wifi_data.wifi_data(folder_location=folderLocation, filename=fname_dataset, normalize=True, missingValues=-200, nTraining=2370, nTesting=750, nValidation=0, verbose=False)
+    # Show the dataset properties
     print "Training Shape: ", dataset.train_set.shape, dataset.pos_train.shape
     print "Test Shape: ", dataset.test_set.shape, dataset.pos_test.shape
+    # Validation split can be omitted, because Keras can create a validation
+    # split from the training set
     if dataset.valid_set != None:
         print "Validation Shape: ", dataset.valid_set.shape, dataset.pos_valid.shape
 
-    myNN = nn.nn(model_name=fname_model, location=folderLocation, valid_split = 0.2)
+    # Initiate the Neural Network Object
+    myNN = nn.nn(model_name=fname_model, location=folderLocation, valid_split = 0.15, epoch=10000)
+    # myGRU = gru.gru(model_name=fname_model_rnn, location=folderLocation, valid_split = 0.2, epoch=100)
+
+    # Check if the model already exists, which prevents re-training
+    # If the model does NOT exist, train the model with the training samples
+    # Otherwise, the already existing model will be used.
     if not myNN.model_exists:
         myNN.fit_model(dataset.train_set, dataset.pos_train)
-
-    # print "evaluation:"
-    # print myNN.evaluate_model(dataset.valid_set, dataset.pos_valid)
-
+        # myGRU.fit_model(dataset.train_set, dataset.pos_train)
+    # Testing
     loc_hat = myNN.predict(dataset.test_set)
-    mse = localization_loss(loc_hat, dataset.pos_test)
+    # loc_hat = myGRU.predict(dataset.test_set)
 
-    print "\n", mse
+    # Evaluation
+    mse, mse_x, mse_y = myNN.residual_analysis(y=dataset.pos_test, y_hat=loc_hat, plot_cdf=True, nbins=100)
+    # mse, mse_x, mse_y = myGRU.residual_analysis(y=dataset.pos_test, y_hat=loc_hat, plot_cdf=True, nbins=100)
 
-    answer = raw_input("Would you like to save the model? Y/n\n")
-    if answer[0] == 'y' or answer[0] == 'Y':
-        myNN.save_model(folderLocation, fname_model)
+    print "\nMSE: ", mse, "MSE_x: ", mse_x, " MSE_y: ", mse_y
+
+    # answer = raw_input("Would you like to save the model? Y/n\n")
+    # if answer[0] == 'y' or answer[0] == 'Y':
+    #     myNN.save_model(folderLocation, fname_model)
 
 if __name__ == "__main__":
     main()
