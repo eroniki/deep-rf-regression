@@ -111,3 +111,5 @@ ENV/
 .nfs*
 
 # End of https://www.gitignore.io/api/python,linux
+
+*.h5
