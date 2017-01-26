@@ -12,7 +12,7 @@ def main():
     fname_model_rnn = "1484752125_model_rnn.h5"
     folderLocation = os.path.dirname(os.path.realpath(__file__))
     # Create the dataset
-    dataset = wifi_data.wifi_data(folder_location=folderLocation, filename=fname_dataset, normalize=True, missingValues=-200, nTraining=2370, nTesting=750, nValidation=0, verbose=False)
+    dataset = wifi_data.wifi_data(folder_location=folderLocation, filename=fname_dataset, normalize=False, missingValues=0, nTraining=2370, nTesting=750, nValidation=0, verbose=False)
     # Show the dataset properties
     print "Training Shape: ", dataset.train_set.shape, dataset.pos_train.shape
     print "Test Shape: ", dataset.test_set.shape, dataset.pos_test.shape
@@ -22,7 +22,7 @@ def main():
         print "Validation Shape: ", dataset.valid_set.shape, dataset.pos_valid.shape
 
     # Initiate the Neural Network Object
-    myNN = nn.nn(model_name=fname_model, location=folderLocation, valid_split = 0.15, epoch=10000)
+    myNN = nn.nn(model_name=fname_model, location=folderLocation, valid_split = 0.15, epoch=150)
     # myGRU = gru.gru(model_name=fname_model_rnn, location=folderLocation, valid_split = 0.2, epoch=100)
 
     # Check if the model already exists, which prevents re-training
