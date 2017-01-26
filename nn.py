@@ -22,11 +22,11 @@ class nn(object):
         super(nn, self).__init__()
         self.model = None
         self.full_file = None
-        self.sgd = SGD(lr=0.1, decay=1e-6, momentum=0.9, nesterov=True)
+        self.sgd = SGD(lr=0.01, decay=1e-7, momentum=0.9, nesterov=True)
         self.ada = Adagrad(lr=0.01, epsilon=1e-08, decay=0.0)
         self.adam = Adam()
-        self.rmsprop = RMSprop(lr=0.01, clipnorm=1., decay=0.0001)
-        self.optimizer = self.sgd
+        self.rmsprop = RMSprop(lr=0.01, decay=0.0001)
+        self.optimizer = self.rmsprop
         self.model_name = model_name
         self.model_location = location
         self.model_exists = False
@@ -70,20 +70,25 @@ class nn(object):
 
     # TODO: Hard-coded layer structure should be relaxed!
     def init_layers(self):
-        self.model.add(Dense(500, input_dim=132, init='he_normal', activation='relu', W_regularizer=self.regularizer, b_regularizer=self.regularizer))
-        self.model.add(Dropout(0.5))
-        for i in range(132, 6, -3):
-            self.model.add(Dense(i, input_dim=132, init='he_normal', activation='relu', W_regularizer=self.regularizer, b_regularizer=self.regularizer))
+        # self.model.add(Dense(500, input_dim=132, init='he_normal', activation='linear', W_regularizer=self.regularizer, b_regularizer=self.regularizer))
+        # self.model.add(Dropout(0.5))
+
+        for i in range(132, 10, -3):
+            self.model.add(Dense(i, input_dim=132, init='he_normal', activation='linear', W_regularizer=self.regularizer, b_regularizer=self.regularizer))
+            self.model.add(Dropout(0.5))
+            self.model.add(Dense(i, input_dim=132, init='he_normal', activation='linear', W_regularizer=self.regularizer, b_regularizer=self.regularizer))
+            self.model.add(Dropout(0.5))
+            self.model.add(Dense(i, input_dim=132, init='he_normal', activation='linear', W_regularizer=self.regularizer, b_regularizer=self.regularizer))
             self.model.add(Dropout(0.5))
 
 
-        self.model.add(Dense(5, init='he_normal', activation='relu', W_regularizer=self.regularizer, b_regularizer=self.regularizer))
+        self.model.add(Dense(5, init='he_normal', activation='linear', W_regularizer=self.regularizer, b_regularizer=self.regularizer))
         self.model.add(Dropout(0.5))
-        self.model.add(Dense(4, init='he_normal', activation='relu', W_regularizer=self.regularizer, b_regularizer=self.regularizer))
+        self.model.add(Dense(4, init='he_normal', activation='linear', W_regularizer=self.regularizer, b_regularizer=self.regularizer))
         self.model.add(Dropout(0.5))
-        self.model.add(Dense(3, init='he_normal', activation='relu', W_regularizer=self.regularizer, b_regularizer=self.regularizer))
+        self.model.add(Dense(3, init='he_normal', activation='linear', W_regularizer=self.regularizer, b_regularizer=self.regularizer))
         self.model.add(Dropout(0.5))
-        self.model.add(Dense(2, init='he_normal', activation='relu', W_regularizer=self.regularizer, b_regularizer=self.regularizer))
+        self.model.add(Dense(2, init='he_normal', activation='linear', W_regularizer=self.regularizer, b_regularizer=self.regularizer))
 
     def signal_handler(self, signal, frame):
         shutil.rmtree(self.log_dir, ignore_errors=False, onerror=None)
@@ -106,8 +111,8 @@ class nn(object):
         return hist, bins
 
     def compile_model(self):
-        # self.model.compile(loss=self.localization_loss, optimizer=self.optimizer)
         self.model.compile(loss=self.localization_loss, optimizer=self.optimizer)
+        # self.model.compile(loss="mean_squared_error", optimizer=self.optimizer)
 
     def fit_model(self, x_train, y_train):
         self.model.fit(x_train, y_train, nb_epoch=self.epoch, batch_size=self.batch_size, verbose=2, shuffle=True, validation_split = self.valid_split, callbacks=self.callbacks)
@@ -136,15 +141,13 @@ class nn(object):
         return mse, mse_x, mse_y
 
     def localization_loss(self, y, y_hat):
-        error, e_x, e_y = self.calculate_error(y, y_hat)
+        # error, e_x, e_y = self.calculate_error(y, y_hat)
         # return K.mean(np.exp(e_x**2+e_y**2))
-        return K.prod((e_x**2+e_y**2))
-
-    def create_model(self, arg):
-        pass
-
-    def initialize_params(self, arg):
-        pass
+        # return K.prod((e_x**2+e_y**2))
+        # return K.mean(K.sqrt(K.square(e_x)+K.square(e_y)))
+        # return K.sum(K.sqrt(K.square(e_x)+K.square(e_y)))
+        # return K.mean(y-y_hat, axis=1)
+        return K.exp(K.mean(K.sqrt(K.sum(K.square(y-y_hat), axis=0))))
 
     def load_model(self, full_file):
         return load_model(full_file)
