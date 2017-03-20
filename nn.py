@@ -73,22 +73,31 @@ class nn(object):
         # self.model.add(Dense(500, input_dim=132, init='he_normal', activation='linear', W_regularizer=self.regularizer, b_regularizer=self.regularizer))
         # self.model.add(Dropout(0.5))
 
-        for i in range(132, 10, -3):
-            self.model.add(Dense(i, input_dim=132, init='he_normal', activation='linear', W_regularizer=self.regularizer, b_regularizer=self.regularizer))
-            self.model.add(Dropout(0.5))
-            self.model.add(Dense(i, input_dim=132, init='he_normal', activation='linear', W_regularizer=self.regularizer, b_regularizer=self.regularizer))
-            self.model.add(Dropout(0.5))
-            self.model.add(Dense(i, input_dim=132, init='he_normal', activation='linear', W_regularizer=self.regularizer, b_regularizer=self.regularizer))
-            self.model.add(Dropout(0.5))
-
-
-        self.model.add(Dense(5, init='he_normal', activation='linear', W_regularizer=self.regularizer, b_regularizer=self.regularizer))
-        self.model.add(Dropout(0.5))
-        self.model.add(Dense(4, init='he_normal', activation='linear', W_regularizer=self.regularizer, b_regularizer=self.regularizer))
-        self.model.add(Dropout(0.5))
-        self.model.add(Dense(3, init='he_normal', activation='linear', W_regularizer=self.regularizer, b_regularizer=self.regularizer))
-        self.model.add(Dropout(0.5))
-        self.model.add(Dense(2, init='he_normal', activation='linear', W_regularizer=self.regularizer, b_regularizer=self.regularizer))
+        # for i in range(132, 10, -3):
+        #     self.model.add(Dense(i, input_dim=132, init='he_normal', activation='linear', W_regularizer=self.regularizer, b_regularizer=self.regularizer))
+        #     self.model.add(Dropout(0.5))
+        #     self.model.add(Dense(i, input_dim=132, init='he_normal', activation='linear', W_regularizer=self.regularizer, b_regularizer=self.regularizer))
+        #     self.model.add(Dropout(0.5))
+        #     self.model.add(Dense(i, input_dim=132, init='he_normal', activation='linear', W_regularizer=self.regularizer, b_regularizer=self.regularizer))
+        #     self.model.add(Dropout(0.5))
+        #
+        #
+        # self.model.add(Dense(5, init='he_normal', activation='linear', W_regularizer=self.regularizer, b_regularizer=self.regularizer))
+        # self.model.add(Dropout(0.5))
+        # self.model.add(Dense(4, init='he_normal', activation='linear', W_regularizer=self.regularizer, b_regularizer=self.regularizer))
+        # self.model.add(Dropout(0.5))
+        # self.model.add(Dense(3, init='he_normal', activation='linear', W_regularizer=self.regularizer, b_regularizer=self.regularizer))
+        # self.model.add(Dropout(0.5))
+        # self.model.add(Dense(2, init='he_normal', activation='linear', W_regularizer=self.regularizer, b_regularizer=self.regularizer))
+        # self.model.add(Dense(100, input_dim=24, init='uniform', activation='linear', W_regularizer=self.regularizer, b_regularizer=self.regularizer))
+        self.model.add(Dense(30, input_dim=8, init='uniform'))
+        # self.model.add(Activation('tanh'))
+        # self.model.add(Dropout(0.5))
+        # self.model.add(Dense(64, init='uniform'))
+        # self.model.add(Activation('tanh'))
+        # self.model.add(Dropout(0.5))
+        self.model.add(Dense(175, init='uniform'))
+        self.model.add(Activation('softmax'))
 
     def signal_handler(self, signal, frame):
         shutil.rmtree(self.log_dir, ignore_errors=False, onerror=None)
@@ -111,9 +120,9 @@ class nn(object):
         return hist, bins
 
     def compile_model(self):
-        self.model.compile(loss=self.localization_loss, optimizer=self.optimizer)
+        # self.model.compile(loss=self.localization_loss, optimizer=self.optimizer)
         # self.model.compile(loss="mean_squared_error", optimizer=self.optimizer)
-
+        self.model.compile(loss='categorical_crossentropy', optimizer=self.optimizer)
     def fit_model(self, x_train, y_train):
         self.model.fit(x_train, y_train, nb_epoch=self.epoch, batch_size=self.batch_size, verbose=2, shuffle=True, validation_split = self.valid_split, callbacks=self.callbacks)
 
