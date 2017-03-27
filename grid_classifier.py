@@ -199,15 +199,16 @@ def main():
         ax.clear()
         px = probx[i,:].reshape(1,probx[i,:].size)
         py = proby[i,:].reshape(proby[i,:].size,1)
-        # print "px shape: ", px.shape, "py shape", py.shape
-        belief_x = np.matlib.repmat(px, 25,1)
-        belief_y = np.matlib.repmat(py, 1,7)
-        # print belief_x.shape, belief_y.shape
+        print "px shape: ", px.shape, "py shape", py.shape
+
+        belief_x = np.matlib.repmat(px, 7,1)
+        belief_y = np.matlib.repmat(py, 1,25)
+        print belief_x.shape, belief_y.shape
         belief = np.multiply(belief_x, belief_y)
         belief = belief / np.sum(belief)
         im = ax.imshow(belief, extent=[0, 6, 24, 0], aspect='auto', interpolation='gaussian', origin='upper')
         print "gt: ", dataset.grid_labels_test[i,:], "x: ", np.argmax(px), "y: ", np.argmax(py)
-        # ax.plot(dataset.grid_labels_test[i,0],dataset.grid_labels_test[i,1], 'k^')
+        # ax.plot(dataset.grid_labels_test[i,1],dataset.grid_labels_test[i,0], 'k^')
         # fig.colorbar(im, cax=cax)
         # fig.canvas.draw()
         # fig.savefig(str(i).join(('outputs/', '.png')))
